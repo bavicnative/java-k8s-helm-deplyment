@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -x  # Enable debug mode
 echo "Starting script execution..."
 
 sudo apt update
@@ -12,6 +11,4 @@ echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://
 sudo apt update && sudo apt install terraform -y
 
 terraform --version
-echo "Script execution completed."
 
-set +x  # Disable debug mode
