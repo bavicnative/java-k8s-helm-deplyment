@@ -10,7 +10,7 @@ resource "aws_instance" "example" {
   tags = var.tags
 
   root_block_device {
-    volume_size = 8
+    volume_size = 15
     volume_type = "gp2"
   }
 
