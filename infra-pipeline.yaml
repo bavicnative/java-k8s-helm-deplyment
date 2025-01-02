@@ -14,7 +14,7 @@ stages:
   - job: DeployAKS
     displayName: "Deploy AKS using Terraform"
     steps:
-    # Manually install Terraform
+    # Install Terraform manually
     - script: |
         echo "Installing Terraform..."
         curl -o terraform.zip https://releases.hashicorp.com/terraform/1.4.6/terraform_1.4.6_linux_amd64.zip
@@ -23,9 +23,9 @@ stages:
         terraform -version
       displayName: "Install Terraform"
 
-    # Run Terraform commands
+    # Run Terraform commands with correct syntax
     - script: |
-        terraform init $(terraformWorkingDirectory)
-        terraform plan -out=tfplan $(terraformWorkingDirectory)
-        terraform apply -auto-approve tfplan
+        terraform -chdir=$(terraformWorkingDirectory) init
+        terraform -chdir=$(terraformWorkingDirectory) plan -out=tfplan
+        terraform -chdir=$(terraformWorkingDirectory) apply -auto-approve tfplan
       displayName: "Run Terraform"
