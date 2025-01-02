@@ -1,0 +1,50 @@
+# Azure Pipelines YAML for Terraform Deployment
+
+trigger:
+- main # Replace with your branch name if different
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  terraformWorkingDirectory: './terraform' # Update this if your Terraform files are in a subdirectory
+  backendKey: 'terraform.tfstate'
+
+stages:
+- stage: TerraformInitPlanApply
+  displayName: "Terraform Init, Plan, and Apply"
+  jobs:
+  - job: DeployAKS
+    displayName: "Deploy AKS using Terraform"
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+        addToPath: true
+
+    - task: TerraformInstaller@0
+      inputs:
+        terraformVersion: 'latest'
+
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          # Authenticate to Azure
+          az login --service-principal -u $(ARM_CLIENT_ID) -p $(ARM_CLIENT_SECRET) --tenant $(ARM_TENANT_ID)
+
+          # Initialize Terraform backend
+          terraform init \
+            -backend-config="storage_account_name=$(backendStorageAccount)" \
+            -backend-config="container_name=$(backendContainerName)" \
+            -backend-config="key=$(backendKey)" \
+            -backend-config="access_key=$(ARM_ACCESS_KEY)" \
+            $(terraformWorkingDirectory)
+
+          # Terraform Plan
+          terraform plan -out=tfplan $(terraformWorkingDirectory)
+
+          # Terraform Apply
+          terraform apply -auto-approve tfplan
